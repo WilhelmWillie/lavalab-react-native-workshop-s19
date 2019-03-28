@@ -1,20 +1,43 @@
 import React from 'react';
-import { StyleSheet, Text, Button, View, TextInput, Keyboard, FlatList, Linking } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  Button,
+  TextInput,
+  Keyboard,
+  FlatList,
+  Linking
+} from 'react-native';
 
 export default class App extends React.Component {
+  /*
+    Constructor: Called whenever a component is created
+    Takes in a `props` parameter. Props is data passed down from parent components
+    Also allows us to set the internal state of the component
+  */
   constructor(props) {
     super(props);
+
+    // Set our components state (data that we want to manage for this App component)
     this.state = {
       searchQuery: '',
       recipes: []
     };
   }
 
+  /*
+    Internal method used to hit our Recipe Puppy API and update our state
+  */
   fetchRecipes = () => {
+    // Hides the keyboard (if it's up)
     Keyboard.dismiss();
 
+    // Store the state's searchQuery into a convenient variable
     const searchQuery = this.state.searchQuery;
 
+    // Hit our Recipe Puppy API w/ some parameters
+    // Converts the response from JSON to an object and stores it in our state
     fetch(`http://www.recipepuppy.com/api/?q=${searchQuery}&p=1`)
       .then(response => response.json())
       .then(data => {
@@ -24,6 +47,10 @@ export default class App extends React.Component {
       });
   }
 
+  /*
+    Method that we pass as a prop to our FlatList
+    Given a Javascript object, tells our FlatList component how to render each item
+  */
   renderRecipe = (recipe) => {
     return (
       <View style={styles.item}>
@@ -40,10 +67,19 @@ export default class App extends React.Component {
     )
   }
 
+  /*
+    In React, if an item is part of an array and is being rendered, it needs a unique key to make sure
+    updates like delete are properly handled. Keys are supposed to be unique (so like an Id or something like that)
+    but in this case, we'll make the key the index it appears in the array plus the item's title (should be unique enough)
+  */
   keyExtractor = (item, index) => {
     return index + '-' + item.title;
   }
 
+  /*
+    How will our app render our components.
+    This will be updated everytime data passed down to components changes
+  */
   render() {
     return (
       <View style={styles.container}>
@@ -65,6 +101,10 @@ export default class App extends React.Component {
   }
 }
 
+/*
+  React Native stylesheets work very similarly to CSS styles
+  I highly recommend looking into flexbox and how it works because it helps out a lot w/ layouts 
+*/
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#ECF2F6',
