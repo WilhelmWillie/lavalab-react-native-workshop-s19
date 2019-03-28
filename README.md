@@ -6,6 +6,10 @@ the popular Javascript framework React.
 During this workshop, you'll be building a mobile application that will let you search for recipes via public API (Recipe Puppy).
 The app will then display results in a nice list with links to recipes related to the given search input.
 
+![Burger example](doc/burger_sample.PNG)
+
+![Pizza example](doc/pizza_sample.PNG)
+
 ## Learning Outcomes
 
 * Understand how React Native works and the general development workflow
@@ -33,6 +37,7 @@ between your computer and your mobile device. Expo will handle compiling your co
 needing to plug in a device! First though, we need to create an Expo/React Native project.
 
 * Run `expo init recipe-search` into a folder of your choice. This will create a folder called `recipe-search` that will contain the boilerplate React Native code for your application
+  * When prompted, select the "blank" template -- this will create a barebones React Native app that we'll build on top of
 * Run `cd recipe-search` then `expo start` -- this will start your application via Expo so you can access the app on your mobile device. A web page will open up with a QR code. Scan this on your phone so you can open the app via the Expo app
 * (Optional) if you prefer, there will be an option to open the app via an Android or iOS simulator. If you decide to go the simulator route, this is available
 
@@ -40,15 +45,122 @@ At this point, you should see a very basic mobile application on your phone. Ope
 
 ## Basic interface
 
-Input and button that responds to input
+First, let's look at the boilerplate provided. You will see a `<View>` tag and a `<Text>` tag in the render function. React Native uses JSX, which allows us
+to embed HTML-like syntax into Javascript code. The render() function tells React Native how to render the component. Essentially right now, our app is one big React component. You can think of the `<View>` tag like HTML's `<div>` but specific for React Native. Likewise, you can imagine `<Text>` as a `<p>` or `span` tag. If you change anything inside the `<Text`> tag, Expo will reload the code, re-build it, and update it on your phone or simulator.
 
-## Building the Search Bar Interface
+Let's start putting together a very basic interface for our application. We want a text input box and a "search" button.
 
-Making a search bar interface
+To do this, go to line 2 and change it to the following:
+
+```javascript
+import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
+```
+
+We're telling React Native to import the `TextInput` and `Button` components, native components that allow us to gather text input and respond to user clicks/touches. Let's add the following code to our `render()` function (right under the `<Text>` code):
+
+```jsx
+<TextInput value="Burger" style={{height: 40, width: 200, borderColor: 'gray', borderWidth: 1}} />
+<Button title="Search" />
+```
+
+Your app will refresh and you should see a text input box and a search button. We added some `style` to the TextInput component by passing a prop. This prop is an object with rules defining the style of the TextInput component. Does it remind you of CSS?? React Native styles are very similar to CSS so you can do things like set margin, padding, height, width, and more using this style prop. Read more here: https://facebook.github.io/react-native/docs/style (We'll dive into styles later)
+
+If you try changing the text input, it'll reset to "Burger". In addition, pressing "Search" will not do anything. To make our TextInput dynamic, we need to tie it to our App component's state. In addition, we'll define a method that will be called when the "Search" button is pressed.
+
+First, let's tackle the TextInput so that it is tied to a dynamic state.
+
+Add this method to the App component class
+
+```jsx
+constructor(props) {
+  super(props); // Required
+
+  // Set our components state (data that we want to manage for this App component)
+  this.state = {
+    searchQuery: '',
+    recipes: []
+  };
+}
+```
+
+This is the constructor for our App component class. This will let us initialize the internal state for our component. An app's state is stored as a Javascript object which we can manipulate using a `setState` function (more on this in a bit). We define 2 variables in our state: a searchQuery string and a recipes array (we'll be using the recipes array later to store data from our Recipe Puppy API). Now that we've defined a searchQuery variable in our state, let's work on our `TextInput` component so that is tethered to this state.
+
+Change the `TextInput` component in your `render()` function to the following:
+
+```jsx
+<TextInput
+  style={{height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
+  onChangeText={(searchQuery) => this.setState({searchQuery: searchQuery})}
+  value={this.state.searchQuery}
+/>
+```
+
+Instead of our hardcoded "Burger" value, our TextInput will render whatever is stored in `searchQuery`. The `onChangeText` is a prop for the TextInput component that dictates what to do when text is updated. When this function is called, it passes the new text input as a parameter. Then, we call `this.setState({searchQuery: searchQuery})`. This will tell our App component to update our internal state so that the new `searchQuery` is whatever we've inputted into the text box. Why do we not just call `this.state.searchQuery = searchQuery`? `this.setState()` is used by React to keep track of changes to the state so that it knows to re-render the component. Now, if you save and check the app, you should be able to edit that text box.
+
+Let's go ahead and add an action to our search button. Under the `constructor` method, add this to your `App` class:
+
+```jsx
+/*
+  Internal method used to hit our Recipe Puppy API and update our state
+*/
+fetchRecipes = () => {
+  console.log("Button pressed");
+}
+```
+
+Next, change the `Button` line so that it looks like the following:
+```jsx
+<Button title="Search" onPress={this.fetchRecipes} />
+```
+
+Save your code. What we did was pass the `fetchRecipes` function as a prop to our `Button` component. `Button` will call the `onPress` prop whenever it is pressed. If you check the app in Expo, when you click "Search", you will see a message in your terminal! Soon we will link this to code that will retrieve data from Recipe Puppy.
+
+So sweet! At this point, we've built a very basic mobile app that takes text input and prints a message to console.. not that exciting but at least you've dipped your toes into how React works. Now, let's write some code so that our Search button will retrieve data from the internet.
 
 ## Hitting an API
 
-Connecting search bar to the Recipe Puppy API
+First, let's delete the `<Text>` tag in our `render()` function. We're past boilerplate code now, let's get our hands dirty. Change our `fetchRecipes` method so that it looks like the following:
+
+```jsx
+/*
+  Internal method used to hit our Recipe Puppy API and update our state
+*/
+fetchRecipes = () => {
+  // Hides the keyboard (if it's up)
+  Keyboard.dismiss();
+
+  // Store the state's searchQuery into a convenient variable
+  const searchQuery = this.state.searchQuery;
+
+  // Hit our Recipe Puppy API w/ some parameters
+  // Converts the response from JSON to an object and stores it in our state
+  fetch(`http://www.recipepuppy.com/api/?q=${searchQuery}&p=1`)
+    .then(response => response.json())
+    .then(data => {
+      console.log(data.results);
+
+      this.setState({
+        recipes: data.results
+      })
+    });
+}
+```
+
+Next, change line 2 to the following:
+
+```javascript
+import { StyleSheet, Text, View, TextInput, Button, Keyboard } from 'react-native';
+```
+
+Let's break down what we've added. In our `fetchRecipes` method, first we will dismiss the Keyboard. We had to import the `Keyboard` module to do this but this is a piece of code that will hide the keyboard if it's up.
+
+Next, we get the `searchQuery` data stored in our apps state.
+
+Next, we use the built-in `fetch` method to hit a public REST API provided by Recipe Puppy. It takes a simple query parameter (and page parameter) and returns JSON data. Fetching data over the internet is an asynchronous process so we need to write some code to deal with this in a synchronous manner.
+
+This is done in Javascript through promises (https://developers.google.com/web/fundamentals/primers/promises). Fetch returns a Promise with JSON text data. Then we use another promise (`json()`) to convert that JSON text data to a Javascript object. Our final link in the Promise chain will store the parsed data into our app's state.
+
+I added a `console.log` statement so you can see this JSON data in console when you press search. Now save and check Expo. Enter in something like "rice" and click "Search". Nothing will happen visually but if you check your Terminal/console, you will see JSON output! We're hitting an external web API and can do stuff with this data now!
 
 ## Intro to Lists
 
@@ -56,4 +168,4 @@ Making the flat list component
 
 ## Further Reading
 
-Links to resources 
+Links to resources
