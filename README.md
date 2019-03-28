@@ -8,8 +8,6 @@ The app will then display results in a nice list with links to recipes related t
 
 ![Burger example](doc/burger_sample.PNG)
 
-![Pizza example](doc/pizza_sample.PNG)
-
 ## Learning Outcomes
 
 * Understand how React Native works and the general development workflow
@@ -225,6 +223,126 @@ So sick! At this point, we've built a basic application that takes input, gets d
 
 ## Styling (Optional)
 
+Copy and paste the following stylesheet to replace the `styles` variable in your code. Take a look at how the styles are written so you understand how styling works in React Native.
+
+```javascript
+/*
+  React Native stylesheets work very similarly to CSS styles
+  I highly recommend looking into flexbox and how it works because it helps out a lot w/ layouts
+*/
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#ECF2F6',
+    alignItems: 'flex-start',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    height: '100%'
+  },
+  searchBar: {
+    backgroundColor: '#87EFB8',
+    width: '100%',
+    flexGrow: 0,
+    paddingTop: 50,
+    paddingBottom: 20,
+    paddingLeft: 20,
+    paddingRight: 20,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  searchBox: {
+    height: 40,
+    backgroundColor: '#fff',
+    borderRadius: 5,
+    padding: 10,
+    marginRight: 10,
+    flexBasis: '80%'
+  },
+  recipeList: {
+    flex: 1,
+    paddingBottom: 20
+  },
+  item: {
+    padding: 15,
+    marginLeft: 20,
+    marginRight: 20,
+    marginTop: 20,
+    borderRadius: 5,
+    backgroundColor: '#fff'
+  },
+  title: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    marginBottom: 10
+  },
+  ingredients: {
+    marginBottom: 10
+  }
+});
+```
+
+I decided to make this a bit easier for you all so we don't spend time hand writing these styles! Now let's apply these styles to our app component.
+
+First, let's add styles for our search bar. Replace your `TextInput` and `Button` code with the following:
+
+```jsx
+<View style={styles.searchBar}>
+  <TextInput
+    style={styles.searchBox}
+    onChangeText={(searchQuery) => this.setState({searchQuery: searchQuery})}
+    value={this.state.searchQuery}
+  />
+
+  <Button title="Search" onPress={this.fetchRecipes} color='#17864B'></Button>
+</View>
+```
+
+We wrapped our TextInput and Button inside a `View` (which is like a div tag). We applied a `searchBar` style to our View and a `searchBox` style to our search box.
+
+Now, let's style our list and the list items. We want to wrap our `FlatList` inside a `View` so that the code looks like the following:
+
+```jsx
+<View style={styles.recipeList}>
+  <FlatList data={this.state.recipes} renderItem={this.renderRecipe} keyExtractor={this.keyExtractor} />
+</View>
+```
+
+Next, let's style our items by changing the `renderRecipe` method. Change the code so that your `renderRecipe` looks like the following:
+
+```jsx
+/*
+  Method that we pass as a prop to our FlatList
+  Given a Javascript object, tells our FlatList component how to render each item
+*/
+renderRecipe = (recipe) => {
+  return (
+    <View style={styles.item}>
+      <Text style={styles.title}>{recipe.item.title}</Text>
+      <Text style={styles.ingredients}>{recipe.item.ingredients}</Text>
+
+      <Button
+        title="View Recipe"
+        onPress={() => {
+          Linking.openURL(recipe.item.href);
+        }}
+      />
+    </View>
+  )
+}
+```
+
+Note that we just tacked onto some styles to change the text size, container look, and spacing. Now when we check the app, it looks a lot nicer and looks/feels like a natural mobile application!
+
+![Pizza example](doc/pizza_sample.PNG)
+
+## Wrapping Up
+
+Now, you're app should respond to user input, hit a REST API, and display results in a nice list component. That wraps up this React Native workshop. I hope you enjoyed building this application and learned how React + React Native can be used to build mobile applications.
+
 ## Further Reading
 
-Links to resources
+* https://reactnavigation.org/
+* https://facebook.github.io/react-native/docs/getting-started.html
+* https://facebook.github.io/react-native/docs/tutorial
+* https://survivejs.com/react/getting-started/understanding-react-components/
