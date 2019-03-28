@@ -164,7 +164,66 @@ I added a `console.log` statement so you can see this JSON data in console when 
 
 ## Intro to Lists
 
-Making the flat list component
+Great. We have this data in our application. But it means nothing if we can't render it to our user! Introducing: the FlatList component. This is a component that React Native supplies that allows us to render a basic list with items. React Native makes it super easy to render these lists so let's dive into it.
+
+First, change line 2 to the following (note that we're adding `FlatList` and `Linking` to our import list)
+
+```javascript
+import { StyleSheet, Text, View, TextInput, Button, Keyboard, FlatList, Linking } from 'react-native';
+```
+
+Next, let's add the following method to our App class:
+
+```jsx
+/*
+  Method that we pass as a prop to our FlatList
+  Given a Javascript object, tells our FlatList component how to render each item
+*/
+renderRecipe = (recipe) => {
+  return (
+    <View>
+      <Text>{recipe.item.title}</Text>
+      <Text>{recipe.item.ingredients}</Text>
+
+      <Button
+        title="View Recipe"
+        onPress={() => {
+          Linking.openURL(recipe.item.href);
+        }}
+      />
+    </View>
+  )
+}
+```
+
+This is a method that will be used by our FlatList component to render each item in our `recipes` array. We'll pass this method to our `FlatList` component which will render a `<View>` tag for each item. It takes a parameter (recipe) which is the JS object for each individual item.
+
+In addition, we need a keyExtractor method. Add this method to our App class:
+
+```jsx
+/*
+  In React, if an item is part of an array and is being rendered, it needs a unique key to make sure
+  updates like delete are properly handled. Keys are supposed to be unique (so like an Id or something like that)
+  but in this case, we'll make the key the index it appears in the array plus the item's title (should be unique enough)
+*/
+keyExtractor = (item, index) => {
+  return index + '-' + item.title;
+}
+```
+
+React requires each item to have a unique key if it's part of an array and being iteratively rendered. Usually this is something like an item ID but our API doesn't return that so we make the key for each item the index + the item's title (this should be unique enough)
+
+Now, let's add our FlatList component to our `render()` function. Add the following to the render:
+
+```jsx
+<FlatList data={this.state.recipes} renderItem={this.renderRecipe} keyExtractor={this.keyExtractor} />
+```
+
+Save your code and wait for Expo to reload. Now when you tap your text box, enter text, and click search.. you should see a list of items. Each item will also have a button that when pressed, opens up your phone's browser.
+
+So sick! At this point, we've built a basic application that takes input, gets data from the internet, and renders that data in a list. However, the app doesn't look that great. In the next optional section, we'll be adding some styles to our code so that it looks a little bit better and more like a natural mobile application.
+
+## Styling (Optional)
 
 ## Further Reading
 
