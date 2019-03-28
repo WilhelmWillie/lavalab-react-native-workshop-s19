@@ -40,10 +40,20 @@ At this point, you should see a very basic mobile application on your phone. Ope
 
 ## Basic interface
 
+Input and button that responds to input
+
 ## Building the Search Bar Interface
+
+Making a search bar interface
 
 ## Hitting an API
 
+Connecting search bar to the Recipe Puppy API
+
 ## Intro to Lists
 
+Making the flat list component
+
 ## Further Reading
+
+Links to resources 
