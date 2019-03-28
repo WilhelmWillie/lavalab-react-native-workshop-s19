@@ -6,6 +6,8 @@ the popular Javascript framework React.
 During this workshop, you'll be building a mobile application that will let you search for recipes via public API (Recipe Puppy).
 The app will then display results in a nice list with links to recipes related to the given search input.
 
+*Link to slides:* https://docs.google.com/presentation/d/1AeVscAC5sdwZhaVPWyj5q5tmVf-v57dEO_n8wibHNLw/edit?usp=sharing 
+
 ![Burger example](doc/burger_sample.PNG)
 
 ## Learning Outcomes
